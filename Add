@@ -1,0 +1,72 @@
+ parent 5c62784b
+ Branches 
+main
+ No related tags found
+ No related merge requests found
+Pipeline #388 failed
+2 minutes ago
+Changes
+2
+Pipelines
+1
+Showing 
+ with 16 additions and 16 deletions
+  .gitlab-ci.env.yml 
++
+5
+−
+5
+variables:
+  SSH_HOST: "bsit3block8group3ssh.markemilcajesdacoylo.online"
+  SSH_USER: "root"
+  SSH_PASSWORD: "bsit3block8g3"
+.deploy_variables_prod:
+  variables:
+    SSH_HOST: "bsit3block8group3ssh.markemilcajesdacoylo.online"
+    SSH_USER: "root"
+    SSH_PASSWORD: "bsit3block8g3"
+  .gitlab-ci.yml 
++
+11
+−
+11
+@@ -8,28 +8,28 @@ stages:
+
+deploy_production:
+  stage: deploy
+  extends:
+    - .deploy_variables_prod
+  only:
+    - main
+
+  before_script:
+    # Update and install required packages
+    - apt update
+    - apt install -y curl sshpass git
+    # Download and install Cloudflare tunnel binary
+    - curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb -o cloudflared.deb
+    - dpkg -i cloudflared.deb
+
+  script:
+    - |
+      sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no \
+      sshpass -p "$SSH_PASSWORD" ssh \
+        -o StrictHostKeyChecking=no \
+        -o "ProxyCommand=cloudflared access ssh --hostname %h" \
+        $SSH_USER@$SSH_HOST << 'EOF'
+        set -e
+        echo "Connected via Cloudflare Tunnel"
+        cd /home/easystock-pharmacy
+        echo "Pull latest code"
+        git pull origin main
+        php artisan migrate
+        echo "Deployment finished"
+      set -e
+      echo "Connected via Cloudflare Tunnel"
+      cd /home/easystock-pharmacy
+      echo "Pull latest code"
+      git pull origin main
+      php artisan migrate
+      echo "Deployment finished"
+      EOF
+
